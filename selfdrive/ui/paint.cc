@@ -1385,11 +1385,12 @@ static void draw_speedlimit_signs(UIState *s) {
   int s_center_x = bdr_s + 305 + (s->scene.display_maxspeed_time > 0 ? 184 : 0);
   const int s_center_y = bdr_s + 100;
 
-  int safety_speed = s->scene.limitSpeedCamera;
-  float safety_dist = s->scene.limitSpeedCameraDist;
+  int current_speed_limit = s->scene.limitSpeedCamera;
+  int upcoming_speed_limit = s->scene.liveMapData.ospeedLimitAhead;
+  float upcoming_speed_limit_distance = s->scene.limitSpeedCameraDist;
   float maxspeed = round(s->scene.controls_state.getVCruise());
-  //int safety_speed = s->scene.liveNaviData.opkrspeedlimit;
-  //float safety_dist = s->scene.liveNaviData.opkrspeedlimitdist;
+  //int current_speed_limit = s->scene.liveNaviData.opkrspeedlimit;
+  //float upcoming_speed_limit_distance = s->scene.liveNaviData.opkrspeedlimitdist;
   int sl_opacity = 0;
   if (s->scene.sl_decel_off) {
     sl_opacity = 3;
@@ -1399,15 +1400,28 @@ static void draw_speedlimit_signs(UIState *s) {
     sl_opacity = 1;
   }
 
-  // upcoming speed limit: small sign
-  if (s->scene.liveMapData.ospeedLimitAhead != 0 and safety_dist < 1000) {
-    draw_speedlimit_sign(s, 1, safety_speed, s_center_x + 140, s_center_y, sl_opacity);
-    draw_upcoming_speedlimit_distance(s, safety_speed, safety_dist, maxspeed, s_center_x + 110, s_center_y - 30,
+
+
+  if (upcoming_speed_limit != 0 and upcoming_speed_limit_distance < 1000) {
+
+    if (current_speed_limit != 0) {
+
+      // a current speed limit is known: display upcoming speed limit as a small sign, offset to the right
+      draw_speedlimit_sign(s, 1, upcoming_speed_limit, s_center_x + 140, s_center_y, sl_opacity);
+      draw_upcoming_speedlimit_distance(s, current_speed_limit, upcoming_speed_limit_distance, maxspeed,
+                                        s_center_x + 100, s_center_y - 30,
+                                        sl_opacity);
+    }
+  } else {
+    // no current speed limit: display upcoming speed as big sign
+    draw_speedlimit_sign(s, 0, upcoming_speed_limit, s_center_x, s_center_y, sl_opacity);
+    draw_upcoming_speedlimit_distance(s, current_speed_limit, upcoming_speed_limit_distance, maxspeed,
+                                      s_center_x, s_center_y,
                                       sl_opacity);
   }
 
   // current speed limit: big sign
-  draw_speedlimit_sign(s, 0, safety_speed, s_center_x, s_center_y, sl_opacity);
+  draw_speedlimit_sign(s, 0, current_speed_limit, s_center_x, s_center_y, sl_opacity);
 }
 
 static void draw_compass(UIState *s) {
