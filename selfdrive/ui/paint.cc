@@ -1360,20 +1360,20 @@ static void draw_upcoming_speedlimit_distance(UIState *s, int upcoming_speed_lim
   snprintf(safetySpeed, sizeof(safetySpeed), "%d", upcoming_speed_limit);
   if (maxspeed != 255.0) {
     if (s->scene.is_metric) {
-      if (safety_dist < 1000) {
+      if (distance < 1000) {
         snprintf(safetyDist, sizeof(safetyDist), "%.0fm", distance);
       }
-      opacity = safety_dist > 600 ? 0 : (600 - distance) * 0.425;
+      opacity = distance > 600 ? 0 : (600 - distance) * 0.425;
     } else {
-      if (safety_dist < 1000) {
+      if (distance < 1000) {
         snprintf(safetyDist, sizeof(safetyDist), "%.0fyd", distance);
       }
-      opacity = safety_dist > 600 ? 0 : (600 - distance) * 0.425;
+      opacity = distance > 600 ? 0 : (600 - distance) * 0.425;
     }
   }
 
-  if (safety_speed > 21) {
-    if (safety_dist != 0) {
+  if (upcoming_speed_limit > 21) {
+    if (distance != 0) {
       ui_fill_rect(s->vg, rect_d, COLOR_RED_ALPHA(opacity / sl_opacity), 20.);
       ui_draw_rect(s->vg, rect_d, COLOR_WHITE_ALPHA(200 / sl_opacity), 8, 20);
       nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
