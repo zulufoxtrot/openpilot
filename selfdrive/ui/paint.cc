@@ -1340,7 +1340,7 @@ static void draw_speedlimit_sign(UIState *s, int size, int safety_speed, int s_c
   }
 }
 
-static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, float safety_dist, float maxspeed, int s_center_x, int s_center_y, int sl_opacity){
+static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, float safety_dist, float maxspeed, int s_center_x, int s_center_y, int sl_opacity) {
   char safetySpeed[16];
   char safetyDist[32];
 
@@ -1350,7 +1350,7 @@ static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, floa
   const int d_height = 70;
   int opacity = 0;
 
-  const Rect rect_d = {d_center_x - d_width/2, d_center_y - d_height/2, d_width, d_height};
+  const Rect rect_d = {d_center_x - d_width / 2, d_center_y - d_height / 2, d_width, d_height};
 
   snprintf(safetySpeed, sizeof(safetySpeed), "%d", safety_speed);
   if (maxspeed != 255.0) {
@@ -1358,22 +1358,24 @@ static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, floa
       if (safety_dist < 1000) {
         snprintf(safetyDist, sizeof(safetyDist), "%.0fm", safety_dist);
       }
-      opacity = safety_dist>600 ? 0 : (600 - safety_dist) * 0.425;
+      opacity = safety_dist > 600 ? 0 : (600 - safety_dist) * 0.425;
     } else {
       if (safety_dist < 1000) {
         snprintf(safetyDist, sizeof(safetyDist), "%.0fyd", safety_dist);
       }
-      opacity = safety_dist>600 ? 0 : (600 - safety_dist) * 0.425;
+      opacity = safety_dist > 600 ? 0 : (600 - safety_dist) * 0.425;
     }
   }
 
-  if (safety_speed > 21){
+  if (safety_speed > 21) {
     if (safety_dist != 0) {
-      ui_fill_rect(s->vg, rect_d, COLOR_RED_ALPHA(opacity/sl_opacity), 20.);
-      ui_draw_rect(s->vg, rect_d, COLOR_WHITE_ALPHA(200/sl_opacity), 8, 20);
+      ui_fill_rect(s->vg, rect_d, COLOR_RED_ALPHA(opacity / sl_opacity), 20.);
+      ui_draw_rect(s->vg, rect_d, COLOR_WHITE_ALPHA(200 / sl_opacity), 8, 20);
       nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-      ui_draw_text(s, rect_d.centerX(), rect_d.centerY(), safetyDist, 78, COLOR_WHITE_ALPHA(200/sl_opacity), "sans-bold");
+      ui_draw_text(s, rect_d.centerX(), rect_d.centerY(), safetyDist, 78, COLOR_WHITE_ALPHA(200 / sl_opacity),
+                   "sans-bold");
     }
+  }
 }
 
 
