@@ -1288,64 +1288,61 @@ static void bb_ui_draw_UI(UIState *s) {
   bb_ui_draw_measures_right(s, bb_dmr_x, bb_dmr_y-20, bb_dmr_w);
 }
 
-static void draw_speedlimit_sign(UIState *s, int size, int safety_speed, int s_center_x, int s_center_y,int sl_opacity) {
+static void draw_speed_limit_sign(UIState *s, int size, int speed_limit, int s_center_x, int s_center_y,int sl_opacity) {
   // int size: 0 = big, 1 = small
   const int diameter = (size == 0) ? 185 : 123;
   const int diameter2 = (size == 0) ? 170 : 113;
   const int diameter3 = (size == 0) ? 202 : 134;
 
   char safetySpeed[16];
-  snprintf(safetySpeed, sizeof(safetySpeed), "%d", safety_speed);
+  snprintf(safetySpeed, sizeof(safetySpeed), "%d", speed_limit);
 
   const Rect rect_s = {s_center_x - diameter / 2, s_center_y - diameter / 2, diameter, diameter};
   const Rect rect_si = {s_center_x - diameter2 / 2, s_center_y - diameter2 / 2, diameter2, diameter2};
   const Rect rect_so = {s_center_x - diameter3 / 2, s_center_y - diameter3 / 2, diameter3, diameter3};
 
+  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 
-  if (safety_speed > 21) {
-    nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+  // draw speed limit frame
+  if (s->scene.speedlimit_signtype) {
+    ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200 / sl_opacity), 16.);
+    ui_draw_rect(s->vg, rect_s, COLOR_BLACK_ALPHA(200 / sl_opacity), 9, 17.);
+    ui_draw_rect(s->vg, rect_so, COLOR_WHITE_ALPHA(200 / sl_opacity), 6, 20.);
+    ui_draw_text(s, rect_s.centerX(), rect_s.centerY() - 55, "SPEED", 55, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                 "sans-bold");
+    ui_draw_text(s, rect_s.centerX(), rect_s.centerY() - 20, "LIMIT", 55, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                 "sans-bold");
+  } else {
+    ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200 / sl_opacity), diameter2 / 2);
+    ui_draw_rect(s->vg, rect_s, COLOR_RED_ALPHA(200 / sl_opacity), 20, diameter / 2);
+  }
 
-    // draw speed limit frame
+  int offset = (size == 0) ? 35 : 23;
+  int text_size_2_digits_eu = (size == 0) ? 160 : 105;
+  int text_size_3_digits_eu = (size == 0) ? 140 : 93;
+  int text_size_us = (size == 0) ? 115 : 77;
+
+  // draw speed limit value
+  if (speed_limit < 100) {
     if (s->scene.speedlimit_signtype) {
-      ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200 / sl_opacity), 16.);
-      ui_draw_rect(s->vg, rect_s, COLOR_BLACK_ALPHA(200 / sl_opacity), 9, 17.);
-      ui_draw_rect(s->vg, rect_so, COLOR_WHITE_ALPHA(200 / sl_opacity), 6, 20.);
-      ui_draw_text(s, rect_s.centerX(), rect_s.centerY() - 55, "SPEED", 55, COLOR_BLACK_ALPHA(200 / sl_opacity),
-                   "sans-bold");
-      ui_draw_text(s, rect_s.centerX(), rect_s.centerY() - 20, "LIMIT", 55, COLOR_BLACK_ALPHA(200 / sl_opacity),
+      ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + offset, safetySpeed, text_size_2_digits_eu, COLOR_BLACK_ALPHA(200 / sl_opacity),
                    "sans-bold");
     } else {
-      ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200 / sl_opacity), diameter2 / 2);
-      ui_draw_rect(s->vg, rect_s, COLOR_RED_ALPHA(200 / sl_opacity), 20, diameter / 2);
+      ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, text_size_3_digits_eu, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                   "sans-bold");
     }
-
-    int offset = (size == 0) ? 35 : 23;
-    int text_size_2_digits_eu = (size == 0) ? 160 : 105;
-    int text_size_3_digits_eu = (size == 0) ? 140 : 93;
-    int text_size_us = (size == 0) ? 115 : 77;
-
-    // draw speed limit value
-    if (safety_speed < 100) {
-      if (s->scene.speedlimit_signtype) {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + offset, safetySpeed, text_size_2_digits_eu, COLOR_BLACK_ALPHA(200 / sl_opacity),
-                     "sans-bold");
-      } else {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, text_size_3_digits_eu, COLOR_BLACK_ALPHA(200 / sl_opacity),
-                     "sans-bold");
-      }
+  } else {
+    if (s->scene.speedlimit_signtype) {
+      ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + offset, safetySpeed, text_size_us, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                   "sans-bold");
     } else {
-      if (s->scene.speedlimit_signtype) {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + offset, safetySpeed, text_size_us, COLOR_BLACK_ALPHA(200 / sl_opacity),
-                     "sans-bold");
-      } else {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, text_size_us, COLOR_BLACK_ALPHA(200 / sl_opacity),
-                     "sans-bold");
-      }
+      ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, text_size_us, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                   "sans-bold");
     }
   }
 }
 
-static void draw_upcoming_speedlimit_distance(UIState *s, int upcoming_speed_limit, float distance, float maxspeed, int s_center_x, int s_center_y, int sl_opacity) {
+static void draw_speed_limit_ahead_distance(UIState *s, int speed_limit_ahead, float distance, float maxspeed, int s_center_x, int s_center_y, int sl_opacity) {
   char safetySpeed[16];
   char safetyDist[32];
 
@@ -1357,7 +1354,7 @@ static void draw_upcoming_speedlimit_distance(UIState *s, int upcoming_speed_lim
 
   const Rect rect_d = {d_center_x - d_width / 2, d_center_y - d_height / 2, d_width, d_height};
 
-  snprintf(safetySpeed, sizeof(safetySpeed), "%d", upcoming_speed_limit);
+  snprintf(safetySpeed, sizeof(safetySpeed), "%d", speed_limit_ahead);
   if (maxspeed != 255.0) {
     if (s->scene.is_metric) {
       snprintf(safetyDist, sizeof(safetyDist), "%.0fm", distance);
@@ -1368,7 +1365,7 @@ static void draw_upcoming_speedlimit_distance(UIState *s, int upcoming_speed_lim
     }
   }
 
-  if (upcoming_speed_limit > 21) {
+  if (speed_limit_ahead > 21) {
     if (distance != 0) {
       ui_fill_rect(s->vg, rect_d, COLOR_RED_ALPHA(opacity / sl_opacity), 20.);
       ui_draw_rect(s->vg, rect_d, COLOR_WHITE_ALPHA(200 / sl_opacity), 8, 20);
@@ -1380,17 +1377,17 @@ static void draw_upcoming_speedlimit_distance(UIState *s, int upcoming_speed_lim
 }
 
 
-// show speedlimit value
+// show speed limit signs (current and ahead)
 static void draw_speedlimit_signs(UIState *s) {
   int s_center_x = bdr_s + 305 + (s->scene.display_maxspeed_time > 0 ? 184 : 0);
   const int s_center_y = bdr_s + 100;
 
   int current_speed_limit = s->scene.limitSpeedCamera;
-  int upcoming_speed_limit = s->scene.liveMapData.ospeedLimitAhead;
-  float upcoming_speed_limit_distance = s->scene.limitSpeedCameraDist;
+  int speed_limit_ahead = s->scene.liveMapData.ospeedLimitAhead;
+  float speed_limit_ahead_distance = s->scene.limitSpeedCameraDist;
   float maxspeed = round(s->scene.controls_state.getVCruise());
   //int current_speed_limit = s->scene.liveNaviData.opkrspeedlimit;
-  //float upcoming_speed_limit_distance = s->scene.liveNaviData.opkrspeedlimitdist;
+  //float speed_limit_ahead_distance = s->scene.liveNaviData.opkrspeedlimitdist;
   int sl_opacity = 0;
   if (s->scene.sl_decel_off) {
     sl_opacity = 3;
@@ -1400,26 +1397,28 @@ static void draw_speedlimit_signs(UIState *s) {
     sl_opacity = 1;
   }
 
-  // "upcoming speed limit" sign logic
-  if (upcoming_speed_limit != 0 and upcoming_speed_limit_distance < 1000) {
+  // "speed limit ahead" sign logic
+  if (speed_limit_ahead != 0 and speed_limit_ahead_distance < 500) {
 
     if (current_speed_limit != 0) {
-      // a current speed limit is known: display upcoming speed limit as a small sign, offset to the right
-      draw_speedlimit_sign(s, 1, upcoming_speed_limit, s_center_x + 140, s_center_y, sl_opacity);
-      draw_upcoming_speedlimit_distance(s, current_speed_limit, upcoming_speed_limit_distance, maxspeed,
-                                        s_center_x + 100, s_center_y - 30,
-                                        sl_opacity);
+      // a current speed limit is known: display speed limit ahead as a small sign, offset to the right
+      draw_speed_limit_sign(s, 1, speed_limit_ahead, s_center_x + 140, s_center_y, sl_opacity);
+      draw_speed_limit_ahead_distance(s, current_speed_limit, speed_limit_ahead_distance, maxspeed,
+                                         s_center_x + 100, s_center_y - 30,
+                                         sl_opacity);
     } else {
-      // no current speed limit: display upcoming speed as big sign
-      draw_speedlimit_sign(s, 0, upcoming_speed_limit, s_center_x, s_center_y, sl_opacity);
-      draw_upcoming_speedlimit_distance(s, current_speed_limit, upcoming_speed_limit_distance, maxspeed,
-                                        s_center_x, s_center_y,
-                                        sl_opacity);
+      // no current speed limit: display speed ahead as big sign
+      draw_speed_limit_sign(s, 0, speed_limit_ahead, s_center_x, s_center_y, sl_opacity);
+      draw_speed_limit_ahead_distance(s, current_speed_limit, speed_limit_ahead_distance, maxspeed,
+                                         s_center_x, s_center_y,
+                                         sl_opacity);
     }
   }
 
-  // current speed limit: big sign. paint partially over upcoming sign
-  draw_speedlimit_sign(s, 0, current_speed_limit, s_center_x, s_center_y, sl_opacity);
+  if (current_speed_limit != 0) {
+    // current speed limit: big sign. paint partially over sign ahead
+    draw_speed_limit_sign(s, 0, current_speed_limit, s_center_x, s_center_y, sl_opacity);
+  }
 }
 
 static void draw_compass(UIState *s) {
