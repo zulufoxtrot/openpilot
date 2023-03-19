@@ -1360,14 +1360,10 @@ static void draw_upcoming_speedlimit_distance(UIState *s, int upcoming_speed_lim
   snprintf(safetySpeed, sizeof(safetySpeed), "%d", upcoming_speed_limit);
   if (maxspeed != 255.0) {
     if (s->scene.is_metric) {
-      if (distance < 1000) {
-        snprintf(safetyDist, sizeof(safetyDist), "%.0fm", distance);
-      }
+      snprintf(safetyDist, sizeof(safetyDist), "%.0fm", distance);
       opacity = distance > 600 ? 0 : (600 - distance) * 0.425;
     } else {
-      if (distance < 1000) {
-        snprintf(safetyDist, sizeof(safetyDist), "%.0fyd", distance);
-      }
+      snprintf(safetyDist, sizeof(safetyDist), "%.0fyd", distance);
       opacity = distance > 600 ? 0 : (600 - distance) * 0.425;
     }
   }
@@ -1404,9 +1400,9 @@ static void draw_speedlimit_signs(UIState *s) {
   }
 
   // upcoming speed limit: small sign
-  if (s->scene.liveMapData.ospeedLimitAhead != 0) {
-    draw_speedlimit_sign(s, 1, safety_speed, s_center_x + 110, s_center_y, sl_opacity);
-    draw_upcoming_speedlimit_distance(s, safety_speed, safety_dist, maxspeed, s_center_x + 110, s_center_y,
+  if (s->scene.liveMapData.ospeedLimitAhead != 0 and safety_dist < 1000) {
+    draw_speedlimit_sign(s, 1, safety_speed, s_center_x + 140, s_center_y, sl_opacity);
+    draw_upcoming_speedlimit_distance(s, safety_speed, safety_dist, maxspeed, s_center_x + 110, s_center_y - 30,
                                       sl_opacity);
   }
 
