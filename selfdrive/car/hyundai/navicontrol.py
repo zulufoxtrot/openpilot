@@ -194,7 +194,7 @@ class NaviControl():
           consider_speed = interp((v_ego_kph - self.map_speed * CV.MPH_TO_KPH if CS.is_set_speed_in_mph else 1), [0, 50], [1, 1.8])
           min_control_dist = interp(self.map_speed * CV.MPH_TO_KPH if CS.is_set_speed_in_mph else 1, [30, 110], [40, 250])
           final_cam_decel_start_dist = cam_distance_calc*consider_speed*v_ego_kph * (1 + self.safetycam_decel_dist_gain*0.01)
-          if ((21 < self.map_speed < spdTarget) or (21 < self.map_speed and spdTarget == 0)) and self.map_speed_dist != 0:
+          if ((5 < self.map_speed < spdTarget) or (5 < self.map_speed and spdTarget == 0)) and self.map_speed_dist != 0:
             if self.map_speed_dist < final_cam_decel_start_dist:
               spdTarget = self.map_speed
             elif self.map_speed_dist < min_control_dist:
@@ -202,7 +202,7 @@ class NaviControl():
             elif spdTarget == 0:
               self.onSpeedControl = False
               return cruise_set_speed_kph
-          elif spdTarget > 21:
+          elif spdTarget > 5:
             pass
           else:
             self.onSpeedControl = False

@@ -48,9 +48,9 @@ def nodes_raw_data_array_for_wr(wr, drop_last=False):
       if node.tags['traffic_calming'] == 'hump':
         data[count][3] = 20/3.6
       if node.tags['traffic_calming'] == 'table':
-        data[count][3] = 30/3.6
+        data[count][3] = 25/3.6
       if node.tags['traffic_calming'] == 'cushion':
-        data[count][3] = 30/3.6
+        data[count][3] = 25/3.6
 
   # reverse the order if way direction is backwards
   if wr.direction == DIRECTION.BACKWARD:
