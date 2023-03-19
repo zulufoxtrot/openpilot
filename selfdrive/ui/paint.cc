@@ -1400,27 +1400,25 @@ static void draw_speedlimit_signs(UIState *s) {
     sl_opacity = 1;
   }
 
-
-
+  // "upcoming speed limit" sign logic
   if (upcoming_speed_limit != 0 and upcoming_speed_limit_distance < 1000) {
 
     if (current_speed_limit != 0) {
-
       // a current speed limit is known: display upcoming speed limit as a small sign, offset to the right
       draw_speedlimit_sign(s, 1, upcoming_speed_limit, s_center_x + 140, s_center_y, sl_opacity);
       draw_upcoming_speedlimit_distance(s, current_speed_limit, upcoming_speed_limit_distance, maxspeed,
                                         s_center_x + 100, s_center_y - 30,
                                         sl_opacity);
+    } else {
+      // no current speed limit: display upcoming speed as big sign
+      draw_speedlimit_sign(s, 0, upcoming_speed_limit, s_center_x, s_center_y, sl_opacity);
+      draw_upcoming_speedlimit_distance(s, current_speed_limit, upcoming_speed_limit_distance, maxspeed,
+                                        s_center_x, s_center_y,
+                                        sl_opacity);
     }
-  } else {
-    // no current speed limit: display upcoming speed as big sign
-    draw_speedlimit_sign(s, 0, upcoming_speed_limit, s_center_x, s_center_y, sl_opacity);
-    draw_upcoming_speedlimit_distance(s, current_speed_limit, upcoming_speed_limit_distance, maxspeed,
-                                      s_center_x, s_center_y,
-                                      sl_opacity);
   }
 
-  // current speed limit: big sign
+  // current speed limit: big sign. paint partially over upcoming sign
   draw_speedlimit_sign(s, 0, current_speed_limit, s_center_x, s_center_y, sl_opacity);
 }
 
