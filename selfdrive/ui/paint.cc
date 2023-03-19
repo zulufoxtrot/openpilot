@@ -76,10 +76,10 @@ static void ui_draw_circle_image_rotation(const UIState *s, int center_x, int ce
 
   nvgSave( s->vg );
   nvgTranslate(s->vg, center_x, (center_y + (bdr_s*1.5)));
-  nvgRotate(s->vg, -img_rotation);  
+  nvgRotate(s->vg, -img_rotation);
 
   ui_draw_image(s, {ct_pos, ct_pos, img_size, img_size}, image, img_alpha);
-  nvgRestore(s->vg); 
+  nvgRestore(s->vg);
 }
 
 static void ui_draw_circle_image(const UIState *s, int center_x, int center_y, int radius, const char *image, bool active) {
@@ -236,7 +236,7 @@ static void ui_draw_vision_lane_lines(UIState *s) {
                                         COLOR_WHITE_ALPHA(150), COLOR_WHITE_ALPHA(20));
   }
 
- 
+
   // paint path
   ui_draw_line(s, scene.track_vertices, nullptr, &track_bg);
 }
@@ -274,7 +274,7 @@ static void ui_draw_standstill(UIState *s) {
 
   int viz_standstill_x = s->fb_w - 560;
   int viz_standstill_y = bdr_s + 160 + 250;
-  
+
   int minute = 0;
   int second = 0;
 
@@ -309,7 +309,7 @@ static void ui_draw_debug(UIState *s) {
   int debug_y1 = 1010-bdr_s+(scene.mapbox_running ? 18:0)-(scene.animated_rpm?60:0);
   int debug_y2 = 1050-bdr_s+(scene.mapbox_running ? 3:0)-(scene.animated_rpm?60:0);
   int debug_y3 = 970-bdr_s+(scene.mapbox_running ? 18:0)-(scene.animated_rpm?60:0);
-  
+
   nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 
   if (scene.nDebugUi1) {
@@ -320,7 +320,7 @@ static void ui_draw_debug(UIState *s) {
     ui_draw_text(s, 0, debug_y3, scene.alertTextMsg3.c_str(), scene.mapbox_running?34:45, COLOR_WHITE_ALPHA(125), "sans-semibold");
   }
 
-  
+
   nvgFillColor(s->vg, COLOR_WHITE_ALPHA(125));
   if (scene.nDebugUi2) {
     //if (scene.gpsAccuracyUblox != 0.00) {
@@ -454,7 +454,7 @@ static void ui_draw_debug(UIState *s) {
   eco @8;
 */
 static void ui_draw_gear( UIState *s ) {
-  const UIScene &scene = s->scene;  
+  const UIScene &scene = s->scene;
   NVGcolor nColor = COLOR_WHITE;
   int x_pos = s->fb_w - (90 + bdr_s);
   int y_pos = bdr_s + 140;
@@ -616,7 +616,7 @@ static void ui_draw_vision_cruise_speed(UIState *s) {
 static void ui_draw_vision_speed(UIState *s) {
   const float speed = std::max(0.0, (*s->sm)["carState"].getCarState().getVEgo()*(s->scene.is_metric ? 3.6 : 2.2369363));
   const std::string speed_str = std::to_string((int)std::nearbyint(speed));
-  UIScene &scene = s->scene;  
+  UIScene &scene = s->scene;
   const int viz_speed_w = 250;
   const int viz_speed_x = s->fb_w/2 - viz_speed_w/2;
   const int header_h2 = 400;
@@ -1223,7 +1223,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     //char uom_str[6];
     std::string main_val = "";
     if (scene.charge_meter > 0) {
-      main_val = std::to_string(int(scene.charge_meter)) + "%";  
+      main_val = std::to_string(int(scene.charge_meter)) + "%";
     } else {
       main_val = "S " + std::to_string(int(scene.gear_step));
     }
@@ -1288,89 +1288,86 @@ static void bb_ui_draw_UI(UIState *s) {
   bb_ui_draw_measures_right(s, bb_dmr_x, bb_dmr_y-20, bb_dmr_w);
 }
 
-// show speedlimit value
-static void draw_safetysign(UIState *s) {
-  const int diameter = 185;
-  const int diameter2 = 170;
-  const int diameter3 = 202;
-  int s_center_x = bdr_s + 305 + (s->scene.display_maxspeed_time>0 ? 184 : 0);
-  const int s_center_y = bdr_s + 100;
-  
+static void draw_speedlimit_sign(UIState *s, int size, int safety_speed, int s_center_x, int s_center_y,int sl_opacity) {
+  // int size: 0 = big, 1 = small
+  const int diameter = (size == 0) ? 185 : 123;
+  const int diameter2 = (size == 0) ? 170 : 113;
+  const int diameter3 = (size == 0) ? 202 : 134;
+
+  char safetySpeed[16];
+  snprintf(safetySpeed, sizeof(safetySpeed), "%d", safety_speed);
+
+  const Rect rect_s = {s_center_x - diameter / 2, s_center_y - diameter / 2, diameter, diameter};
+  const Rect rect_si = {s_center_x - diameter2 / 2, s_center_y - diameter2 / 2, diameter2, diameter2};
+  const Rect rect_so = {s_center_x - diameter3 / 2, s_center_y - diameter3 / 2, diameter3, diameter3};
+
+
+  if (safety_speed > 21) {
+    nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+
+    // draw speed limit frame
+    if (s->scene.speedlimit_signtype) {
+      ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200 / sl_opacity), 16.);
+      ui_draw_rect(s->vg, rect_s, COLOR_BLACK_ALPHA(200 / sl_opacity), 9, 17.);
+      ui_draw_rect(s->vg, rect_so, COLOR_WHITE_ALPHA(200 / sl_opacity), 6, 20.);
+      ui_draw_text(s, rect_s.centerX(), rect_s.centerY() - 55, "SPEED", 55, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                   "sans-bold");
+      ui_draw_text(s, rect_s.centerX(), rect_s.centerY() - 20, "LIMIT", 55, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                   "sans-bold");
+    } else {
+      ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200 / sl_opacity), diameter2 / 2);
+      ui_draw_rect(s->vg, rect_s, COLOR_RED_ALPHA(200 / sl_opacity), 20, diameter / 2);
+    }
+
+    // draw speed limit value
+    if (safety_speed < 100) {
+      if (s->scene.speedlimit_signtype) {
+        ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + 35, safetySpeed, 140, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                     "sans-bold");
+      } else {
+        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, 160, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                     "sans-bold");
+      }
+    } else {
+      if (s->scene.speedlimit_signtype) {
+        ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + 35, safetySpeed, 115, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                     "sans-bold");
+      } else {
+        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, 115, COLOR_BLACK_ALPHA(200 / sl_opacity),
+                     "sans-bold");
+      }
+    }
+  }
+}
+
+static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, float safety_dist, float maxspeed, int s_center_x, int s_center_y){
+  char safetySpeed[16];
+  char safetyDist[32];
+
   int d_center_x = s_center_x;
   const int d_center_y = s_center_y + 155;
   const int d_width = 220;
   const int d_height = 70;
   int opacity = 0;
 
-  const Rect rect_s = {s_center_x - diameter/2, s_center_y - diameter/2, diameter, diameter};
-  const Rect rect_si = {s_center_x - diameter2/2, s_center_y - diameter2/2, diameter2, diameter2};
-  const Rect rect_so = {s_center_x - diameter3/2, s_center_y - diameter3/2, diameter3, diameter3};
   const Rect rect_d = {d_center_x - d_width/2, d_center_y - d_height/2, d_width, d_height};
-  char safetySpeed[16];
-  char safetyDist[32];
-  int safety_speed = s->scene.limitSpeedCamera;
-  float safety_dist = s->scene.limitSpeedCameraDist;
-  float maxspeed = round(s->scene.controls_state.getVCruise());
-  //int safety_speed = s->scene.liveNaviData.opkrspeedlimit;
-  //float safety_dist = s->scene.liveNaviData.opkrspeedlimitdist;
-  int sl_opacity = 0;
-  if (s->scene.sl_decel_off) {
-    sl_opacity = 3;
-  } else if (s->scene.osm_off_spdlimit) {
-    sl_opacity = 2;
-  } else {
-    sl_opacity = 1;
-  }
 
   snprintf(safetySpeed, sizeof(safetySpeed), "%d", safety_speed);
   if (maxspeed != 255.0) {
     if (s->scene.is_metric) {
       if (safety_dist < 1000) {
         snprintf(safetyDist, sizeof(safetyDist), "%.0fm", safety_dist);
-      } else if (safety_dist < 10000) {
-        snprintf(safetyDist, sizeof(safetyDist), "%.2fkm", safety_dist/1000);
-      } else {
-        snprintf(safetyDist, sizeof(safetyDist), "%.1fkm", safety_dist/1000);
       }
       opacity = safety_dist>600 ? 0 : (600 - safety_dist) * 0.425;
     } else {
       if (safety_dist < 1000) {
         snprintf(safetyDist, sizeof(safetyDist), "%.0fyd", safety_dist);
-      } else if (safety_dist < 10000) {
-        snprintf(safetyDist, sizeof(safetyDist), "%.2fmi", safety_dist/1000);
-      } else {
-        snprintf(safetyDist, sizeof(safetyDist), "%.1fmi", safety_dist/1000);
       }
       opacity = safety_dist>600 ? 0 : (600 - safety_dist) * 0.425;
     }
   }
 
-  if (safety_speed > 21) {
-    nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-    if (s->scene.speedlimit_signtype) {
-      ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200/sl_opacity), 16.);
-      ui_draw_rect(s->vg, rect_s, COLOR_BLACK_ALPHA(200/sl_opacity), 9, 17.);
-      ui_draw_rect(s->vg, rect_so, COLOR_WHITE_ALPHA(200/sl_opacity), 6, 20.);
-      ui_draw_text(s, rect_s.centerX(), rect_s.centerY()-55, "SPEED", 55, COLOR_BLACK_ALPHA(200/sl_opacity), "sans-bold");
-      ui_draw_text(s, rect_s.centerX(), rect_s.centerY()-20, "LIMIT", 55, COLOR_BLACK_ALPHA(200/sl_opacity), "sans-bold");
-    } else {
-      ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200/sl_opacity), diameter2/2);
-      ui_draw_rect(s->vg, rect_s, COLOR_RED_ALPHA(200/sl_opacity), 20, diameter/2);
-    }
-
-    if (safety_speed < 100) {
-      if (s->scene.speedlimit_signtype) {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY()+35, safetySpeed, 140, COLOR_BLACK_ALPHA(200/sl_opacity), "sans-bold");
-      } else {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, 160, COLOR_BLACK_ALPHA(200/sl_opacity), "sans-bold");
-      }
-    } else {
-      if (s->scene.speedlimit_signtype) {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY()+35, safetySpeed, 115, COLOR_BLACK_ALPHA(200/sl_opacity), "sans-bold");
-      } else {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, 115, COLOR_BLACK_ALPHA(200/sl_opacity), "sans-bold");
-      }
-    }
+  if (safety_speed > 21){
     if (safety_dist != 0) {
       ui_fill_rect(s->vg, rect_d, COLOR_RED_ALPHA(opacity/sl_opacity), 20.);
       ui_draw_rect(s->vg, rect_d, COLOR_WHITE_ALPHA(200/sl_opacity), 8, 20);
@@ -1389,6 +1386,34 @@ static void draw_safetysign(UIState *s) {
       ui_draw_text(s, rect_d.centerX(), rect_d.centerY(), safetyDist, 78, COLOR_WHITE_ALPHA(200/sl_opacity), "sans-bold");
     }
   }
+}
+
+
+// show speedlimit value
+static void draw_speedlimit_signs(UIState *s) {
+  int s_center_x = bdr_s + 305 + (s->scene.display_maxspeed_time > 0 ? 184 : 0);
+  const int s_center_y = bdr_s + 100;
+
+  int safety_speed = s->scene.limitSpeedCamera;
+  float safety_dist = s->scene.limitSpeedCameraDist;
+  float maxspeed = round(s->scene.controls_state.getVCruise());
+  //int safety_speed = s->scene.liveNaviData.opkrspeedlimit;
+  //float safety_dist = s->scene.liveNaviData.opkrspeedlimitdist;
+  int sl_opacity = 0;
+  if (s->scene.sl_decel_off) {
+    sl_opacity = 3;
+  } else if (s->scene.osm_off_spdlimit) {
+    sl_opacity = 2;
+  } else {
+    sl_opacity = 1;
+  }
+
+  // current speed limit: big sign
+  draw_speedlimit_sign(s, 0, safety_speed, s_center_x, s_center_y, sl_opacity, diameter, diameter2, diameter3);
+  // upcoming speed limit: small sign
+  draw_speedlimit_sign(s, 1, safety_speed, s_center_x + 110, s_center_y, sl_opacity, diameter_small, diameter2_small, diameter3_small);
+  draw_upcoming_speedlimit_distance(s, safety_speed, safety_dist, maxspeed, s_center_x + 110, s_center_y);
+
 }
 
 static void draw_compass(UIState *s) {
@@ -1571,9 +1596,9 @@ static void ui_draw_vision_header(UIState *s) {
       ui_draw_standstill(s);
     }
     if (s->scene.navi_select == 0 || s->scene.navi_select == 1 || s->scene.navi_select == 2 || s->scene.mapbox_running) {
-      draw_safetysign(s);
+      draw_speedlimit_signs(s);
     } else if (s->scene.navi_select == 3 && (s->scene.mapSign != 20 && s->scene.mapSign != 21)) {
-      draw_safetysign(s);
+      draw_speedlimit_signs(s);
     }
     draw_compass(s);
     if (s->scene.navi_select == 0 || s->scene.navi_select == 1 || s->scene.navi_select == 2 || s->scene.navi_select == 3 || s->scene.mapbox_running) {
