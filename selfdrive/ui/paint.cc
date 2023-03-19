@@ -1340,7 +1340,7 @@ static void draw_speedlimit_sign(UIState *s, int size, int safety_speed, int s_c
   }
 }
 
-static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, float safety_dist, float maxspeed, int s_center_x, int s_center_y){
+static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, float safety_dist, float maxspeed, int s_center_x, int s_center_y, int sl_opacity){
   char safetySpeed[16];
   char safetyDist[32];
 
@@ -1374,18 +1374,6 @@ static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, floa
       nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
       ui_draw_text(s, rect_d.centerX(), rect_d.centerY(), safetyDist, 78, COLOR_WHITE_ALPHA(200/sl_opacity), "sans-bold");
     }
-  } else if ((s->scene.mapSignCam == 195 || s->scene.mapSignCam == 197) && safety_speed == 0 && safety_dist != 0 && s->scene.navi_select == 1) {
-    ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200/sl_opacity), diameter2/2);
-    ui_draw_rect(s->vg, rect_s, COLOR_RED_ALPHA(200/sl_opacity), 20, diameter/2);
-    nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-    ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), "VAR\nSEC", 108, COLOR_BLACK_ALPHA(200/sl_opacity), "sans-bold");
-    if (safety_dist != 0) {
-      ui_fill_rect(s->vg, rect_d, COLOR_RED_ALPHA(opacity/sl_opacity), 20.);
-      ui_draw_rect(s->vg, rect_d, COLOR_WHITE_ALPHA(200/sl_opacity), 8, 20);
-      nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-      ui_draw_text(s, rect_d.centerX(), rect_d.centerY(), safetyDist, 78, COLOR_WHITE_ALPHA(200/sl_opacity), "sans-bold");
-    }
-  }
 }
 
 
@@ -1409,9 +1397,9 @@ static void draw_speedlimit_signs(UIState *s) {
   }
 
   // current speed limit: big sign
-  draw_speedlimit_sign(s, 0, safety_speed, s_center_x, s_center_y, sl_opacity, diameter, diameter2, diameter3);
+  draw_speedlimit_sign(s, 0, safety_speed, s_center_x, s_center_y, sl_opacity);
   // upcoming speed limit: small sign
-  draw_speedlimit_sign(s, 1, safety_speed, s_center_x + 110, s_center_y, sl_opacity, diameter_small, diameter2_small, diameter3_small);
+  draw_speedlimit_sign(s, 1, safety_speed, s_center_x + 110, s_center_y, sl_opacity);
   draw_upcoming_speedlimit_distance(s, safety_speed, safety_dist, maxspeed, s_center_x + 110, s_center_y);
 
 }
