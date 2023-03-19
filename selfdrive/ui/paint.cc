@@ -1402,7 +1402,8 @@ static void draw_speedlimit_signs(UIState *s) {
   draw_speedlimit_sign(s, 0, safety_speed, s_center_x, s_center_y, sl_opacity);
   // upcoming speed limit: small sign
   draw_speedlimit_sign(s, 1, safety_speed, s_center_x + 110, s_center_y, sl_opacity);
-  draw_upcoming_speedlimit_distance(s, safety_speed, safety_dist, maxspeed, s_center_x + 110, s_center_y);
+  draw_upcoming_speedlimit_distance(s, safety_speed, safety_dist, maxspeed, s_center_x + 110, s_center_y,
+                                    sl_opacity);
 
 }
 
