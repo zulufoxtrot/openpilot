@@ -1319,28 +1319,33 @@ static void draw_speedlimit_sign(UIState *s, int size, int safety_speed, int s_c
       ui_draw_rect(s->vg, rect_s, COLOR_RED_ALPHA(200 / sl_opacity), 20, diameter / 2);
     }
 
+    int offset = (size == 0) ? 35 : 23;
+    int text_size_2_digits_eu = (size == 0) ? 160 : 105;
+    int text_size_3_digits_eu = (size == 0) ? 140 : 93;
+    int text_size_us = (size == 0) ? 115 : 77;
+
     // draw speed limit value
     if (safety_speed < 100) {
       if (s->scene.speedlimit_signtype) {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + 35, safetySpeed, 140, COLOR_BLACK_ALPHA(200 / sl_opacity),
+        ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + offset, safetySpeed, text_size_2_digits_eu, COLOR_BLACK_ALPHA(200 / sl_opacity),
                      "sans-bold");
       } else {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, 160, COLOR_BLACK_ALPHA(200 / sl_opacity),
+        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, text_size_3_digits_eu, COLOR_BLACK_ALPHA(200 / sl_opacity),
                      "sans-bold");
       }
     } else {
       if (s->scene.speedlimit_signtype) {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + 35, safetySpeed, 115, COLOR_BLACK_ALPHA(200 / sl_opacity),
+        ui_draw_text(s, rect_s.centerX(), rect_s.centerY() + offset, safetySpeed, text_size_us, COLOR_BLACK_ALPHA(200 / sl_opacity),
                      "sans-bold");
       } else {
-        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, 115, COLOR_BLACK_ALPHA(200 / sl_opacity),
+        ui_draw_text(s, rect_s.centerX(), rect_s.centerY(), safetySpeed, text_size_us, COLOR_BLACK_ALPHA(200 / sl_opacity),
                      "sans-bold");
       }
     }
   }
 }
 
-static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, float safety_dist, float maxspeed, int s_center_x, int s_center_y, int sl_opacity) {
+static void draw_upcoming_speedlimit_distance(UIState *s, int upcoming_speed_limit, float distance, float maxspeed, int s_center_x, int s_center_y, int sl_opacity) {
   char safetySpeed[16];
   char safetyDist[32];
 
@@ -1352,18 +1357,18 @@ static void draw_upcoming_speedlimit_distance(UIState *s, int safety_speed, floa
 
   const Rect rect_d = {d_center_x - d_width / 2, d_center_y - d_height / 2, d_width, d_height};
 
-  snprintf(safetySpeed, sizeof(safetySpeed), "%d", safety_speed);
+  snprintf(safetySpeed, sizeof(safetySpeed), "%d", upcoming_speed_limit);
   if (maxspeed != 255.0) {
     if (s->scene.is_metric) {
       if (safety_dist < 1000) {
-        snprintf(safetyDist, sizeof(safetyDist), "%.0fm", safety_dist);
+        snprintf(safetyDist, sizeof(safetyDist), "%.0fm", distance);
       }
-      opacity = safety_dist > 600 ? 0 : (600 - safety_dist) * 0.425;
+      opacity = safety_dist > 600 ? 0 : (600 - distance) * 0.425;
     } else {
       if (safety_dist < 1000) {
-        snprintf(safetyDist, sizeof(safetyDist), "%.0fyd", safety_dist);
+        snprintf(safetyDist, sizeof(safetyDist), "%.0fyd", distance);
       }
-      opacity = safety_dist > 600 ? 0 : (600 - safety_dist) * 0.425;
+      opacity = safety_dist > 600 ? 0 : (600 - distance) * 0.425;
     }
   }
 
@@ -1398,13 +1403,15 @@ static void draw_speedlimit_signs(UIState *s) {
     sl_opacity = 1;
   }
 
+  // upcoming speed limit: small sign
+  if (s->scene.liveMapData.ospeedLimitAhead != 0) {
+    draw_speedlimit_sign(s, 1, safety_speed, s_center_x + 110, s_center_y, sl_opacity);
+    draw_upcoming_speedlimit_distance(s, safety_speed, safety_dist, maxspeed, s_center_x + 110, s_center_y,
+                                      sl_opacity);
+  }
+
   // current speed limit: big sign
   draw_speedlimit_sign(s, 0, safety_speed, s_center_x, s_center_y, sl_opacity);
-  // upcoming speed limit: small sign
-  draw_speedlimit_sign(s, 1, safety_speed, s_center_x + 110, s_center_y, sl_opacity);
-  draw_upcoming_speedlimit_distance(s, safety_speed, safety_dist, maxspeed, s_center_x + 110, s_center_y,
-                                    sl_opacity);
-
 }
 
 static void draw_compass(UIState *s) {
