@@ -180,7 +180,7 @@ class NaviControl():
 
     if not self.speedlimit_decel_off:
       if self.osm_speedlimit_enabled and not self.sm['controlsState'].osmOffSpdLimit:  # osm speedlimit
-        if self.sm['liveMapData'].speedLimit > 21 or self.sm['liveMapData'].speedLimitAhead > 21:
+        if self.sm['liveMapData'].speedLimit > 5 or self.sm['liveMapData'].speedLimitAhead > 5:
           # spdTarget = cruiseState_speed
           spdTarget = self.sm['liveMapData'].speedLimit
           if spdTarget == 0 and self.drive_routine_on_sl:
