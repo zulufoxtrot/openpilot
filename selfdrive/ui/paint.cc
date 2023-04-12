@@ -1398,7 +1398,7 @@ static void draw_speedlimit_signs(UIState *s) {
   }
 
   // "speed limit ahead" sign logic
-  if (speed_limit_ahead != 0 and speed_limit_ahead_distance < 500) {
+  if (speed_limit_ahead > 20 and speed_limit_ahead_distance < 500) {
 
     if (current_speed_limit != 0) {
       // a current speed limit is known: display speed limit ahead as a small sign, offset to the right
