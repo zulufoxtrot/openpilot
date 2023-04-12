@@ -1376,7 +1376,6 @@ static void draw_speed_limit_ahead_distance(UIState *s, int speed_limit_ahead, f
   }
 }
 
-
 // show speed limit signs (current and ahead)
 static void draw_speedlimit_signs(UIState *s) {
   int s_center_x = bdr_s + 305 + (s->scene.display_maxspeed_time > 0 ? 184 : 0);
@@ -2014,9 +2013,9 @@ static void ui_draw_vision(UIState *s) {
   // Set Speed, Current Speed, Status/Events
   ui_draw_vision_header(s);
   if ((*s->sm)["controlsState"].getControlsState().getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
-    ui_draw_vision_face(s);
     if (scene->comma_stock_ui != 1) {
       ui_draw_blindspot_mon(s);
+      ui_draw_vision_face(s); // moved here for aesthetics
     }
   }
   if (scene->live_tune_panel_enable) {
