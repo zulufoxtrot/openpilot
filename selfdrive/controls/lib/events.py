@@ -705,7 +705,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
       tr(95),
       "",
       AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, .5, alert_rate=0.75),
+      Priority.LOW, VisualAlert.none, AudibleAlert.notification, .5, alert_rate=0.75),
   },
 
   EventName.standstillResButton: {
