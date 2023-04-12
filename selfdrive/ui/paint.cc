@@ -1288,6 +1288,14 @@ static void bb_ui_draw_UI(UIState *s) {
   bb_ui_draw_measures_right(s, bb_dmr_x, bb_dmr_y-20, bb_dmr_w);
 }
 
+static int calculate_duration(float speed_in_ms, float distance){
+  if (speed_in_ms > 0) {
+    return (int)(distance / speed_in_ms);
+  } else {
+    return 0;
+  }
+}
+
 static void draw_speed_limit_sign(UIState *s, int size, int speed_limit, int s_center_x, int s_center_y,int sl_opacity) {
   // int size: 0 = big, 1 = small
   const int diameter = (size == 0) ? 185 : 123;
@@ -1381,6 +1389,8 @@ static void draw_speedlimit_signs(UIState *s) {
   int s_center_x = bdr_s + 305 + (s->scene.display_maxspeed_time > 0 ? 184 : 0);
   const int s_center_y = bdr_s + 100;
 
+  const float current_speed_in_ms = std::max(0.0, (*s->sm)["carState"].getCarState().getVEgo());
+  const float current_speed = current_speed_in_ms * (s->scene.is_metric ? 3.6 : 2.2369363));
   int current_speed_limit = s->scene.limitSpeedCamera;
   int speed_limit_ahead = s->scene.liveMapData.ospeedLimitAhead;
   float speed_limit_ahead_distance = s->scene.limitSpeedCameraDist;
@@ -1397,7 +1407,8 @@ static void draw_speedlimit_signs(UIState *s) {
   }
 
   // "speed limit ahead" sign logic
-  if (speed_limit_ahead > 20 and speed_limit_ahead_distance < 500) {
+  // only display the sign ahead if its speed is >20 and it takes <10 seconds to reach it
+  if (speed_limit_ahead > 20 and calculate_duration(current_speed_in_ms, speed_limit_ahead_distance) < 10) {
 
     if (current_speed_limit != 0) {
       // a current speed limit is known: display speed limit ahead as a small sign, offset to the right
