@@ -763,7 +763,10 @@ static void ui_draw_vision_speed(UIState *s) {
   float gas_opacity = act_accel*255>255?255:act_accel*255;
   float brake_opacity = abs(act_accel*175)>255?255:abs(act_accel*175);
 
-  if (scene.brakePress && scene.comma_stock_ui != 1) {
+  if (scene.brakeLights && scene.comma_stock_ui == 1){
+    // turn speed indicator red in stock OP UI when brake lights turn on
+    val_color = COLOR_RED;
+  } else if (scene.brakePress && scene.comma_stock_ui != 1) {
   	val_color = COLOR_RED;
   } else if (scene.brakeLights && speed_str == "0" && scene.comma_stock_ui != 1) {
   	val_color = nvgRGBA(201, 34, 49, 100);
