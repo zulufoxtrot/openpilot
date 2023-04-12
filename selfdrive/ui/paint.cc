@@ -581,11 +581,11 @@ static void ui_draw_vision_cruise_speed(UIState *s) {
 
   NVGcolor color = COLOR_GREY;
   if (s->scene.is_speed_over_limit) {
-    color = COLOR_OCHRE_ALPHA(200);
+    color = COLOR_OCHRE_ALPHA(200); // orange
   } else if (limitspeedcamera > 21 && (!s->scene.is_speed_over_limit )) {
-    color = nvgRGBA(0, 120, 0, 200);
+    color = nvgRGBA(0, 120, 0, 200); // green
   } else if (s->scene.cruiseAccStatus) {
-    color = nvgRGBA(0, 100, 200, 200);
+    color = nvgRGBA(0, 100, 200, 200); // blue
   } else if (s->scene.controls_state.getEnabled()) {
     color = COLOR_WHITE_ALPHA(75);
   }
@@ -1608,15 +1608,18 @@ static void ui_draw_vision_header(UIState *s) {
   }
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
+
+  // draw speed limit signs in both OPKR *and* stock OP UIs
+  if (s->scene.navi_select == 0 || s->scene.navi_select == 1 || s->scene.navi_select == 2 || s->scene.mapbox_running) {
+    draw_speedlimit_signs(s);
+  } else if (s->scene.navi_select == 3 && (s->scene.mapSign != 20 && s->scene.mapSign != 21)) {
+    draw_speedlimit_signs(s);
+  }
+
   if (s->scene.comma_stock_ui != 1) {
     bb_ui_draw_UI(s);
     if (s->scene.controls_state.getEnabled()) {
       ui_draw_standstill(s);
-    }
-    if (s->scene.navi_select == 0 || s->scene.navi_select == 1 || s->scene.navi_select == 2 || s->scene.mapbox_running) {
-      draw_speedlimit_signs(s);
-    } else if (s->scene.navi_select == 3 && (s->scene.mapSign != 20 && s->scene.mapSign != 21)) {
-      draw_speedlimit_signs(s);
     }
     draw_compass(s);
     if (s->scene.navi_select == 0 || s->scene.navi_select == 1 || s->scene.navi_select == 2 || s->scene.navi_select == 3 || s->scene.mapbox_running) {
