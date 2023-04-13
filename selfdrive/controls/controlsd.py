@@ -543,7 +543,7 @@ class Controls:
       self.v_cruise_kph_set_timer -= 1
     # if stock cruise is completely disabled, then we can use our own set speed logic
     if not self.CP.pcmCruise:
-      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
+      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled, self.is_metric)
     elif self.CP.pcmCruise and CS.cruiseState.enabled:
       if self.cruise_road_limit_spd_enabled and not self.cruise_road_limit_spd_switch and self.cruise_road_limit_spd_switch_prev != 0 and self.cruise_road_limit_spd_switch_prev != self.sm['liveENaviData'].roadLimitSpeed:
         self.cruise_road_limit_spd_switch = True
