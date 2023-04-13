@@ -61,7 +61,7 @@ def rate_limit(new_value, last_value, dw_step, up_step):
 def update_v_cruise(v_cruise_kph, buttonEvents, button_timers, enabled, metric):
   # handle button presses. TODO: this should be in state_control, but a decelCruise press
   # would have the effect of both enabling and changing speed is checked after the state transition
-  reverse_acc_change = Params().get_bool("ReverseAccChange")
+  reverse_acc_change = True
 
   if not enabled:
     return v_cruise_kph
