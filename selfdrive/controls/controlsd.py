@@ -14,7 +14,7 @@ from selfdrive.swaglog import cloudlog
 from selfdrive.boardd.boardd import can_list_to_can_capnp
 from selfdrive.car.car_helpers import get_car, get_startup_event, get_one_can
 from selfdrive.controls.lib.lane_planner import CAMERA_OFFSET, CAMERA_OFFSET_A
-from selfdrive.controls.lib.drive_helpers import update_v_cruise, update_v_cruise_speed, initialize_v_cruise
+from selfdrive.controls.lib.drive_helpers import update_v_cruise, initialize_v_cruise
 from selfdrive.controls.lib.drive_helpers import get_lag_adjusted_curvature
 from selfdrive.controls.lib.longcontrol import LongControl
 from selfdrive.controls.lib.latcontrol_pid import LatControlPID
@@ -542,13 +542,8 @@ class Controls:
     if self.v_cruise_kph_set_timer > 0:
       self.v_cruise_kph_set_timer -= 1
     # if stock cruise is completely disabled, then we can use our own set speed logic
-    # TODO: logic copy/pasted from sunnypilot, but it will probably conflict or at least override OPKR logig.
     if not self.CP.pcmCruise:
-      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.button_timers, self.enabled, self.is_metric)
-    elif self.CP.pcmCruise and not self.CP.pcmCruiseSpeed:
-        self.v_cruise_kph = update_v_cruise_speed(self.v_cruise_kph, CS.buttonEvents, self.button_timers, self.enabled, self.is_metric)
-    elif self.CP.pcmCruise:
-        self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
+      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
     elif self.CP.pcmCruise and CS.cruiseState.enabled:
       if self.cruise_road_limit_spd_enabled and not self.cruise_road_limit_spd_switch and self.cruise_road_limit_spd_switch_prev != 0 and self.cruise_road_limit_spd_switch_prev != self.sm['liveENaviData'].roadLimitSpeed:
         self.cruise_road_limit_spd_switch = True
