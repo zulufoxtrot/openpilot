@@ -1393,7 +1393,7 @@ static void draw_speedlimit_signs(UIState *s) {
   const int s_center_y = bdr_s + 100;
 
   const float current_speed_in_ms = std::max(0.0, (*s->sm)["carState"].getCarState().getVEgo());
-  const float current_speed = current_speed_in_ms * (s->scene.is_metric ? 3.6 : 2.2369363));
+  const float current_speed = current_speed_in_ms * (s->scene.is_metric ? 3.6 : 2.2369363);
   int current_speed_limit = s->scene.limitSpeedCamera;
   int speed_limit_ahead = s->scene.liveMapData.ospeedLimitAhead;
   float speed_limit_ahead_distance = s->scene.limitSpeedCameraDist;
