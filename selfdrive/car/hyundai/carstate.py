@@ -119,12 +119,12 @@ class CarState(CarStateBase):
     self.prev_clu_CruiseSwState = self.cruise_buttons
 
     if self.cruise_buttons == Buttons.RES_ACCEL:   # up 
-      set_speed_kph += 5
+      set_speed_kph += 1
     elif self.cruise_buttons == Buttons.SET_DECEL:  # dn
       if self.gasPressed:
         set_speed_kph = self.clu_Vanz + 1
       else:
-        set_speed_kph -= 5
+        set_speed_kph -= 1
 
     if set_speed_kph < 30 and not self.is_set_speed_in_mph:
       set_speed_kph = 30
