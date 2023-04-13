@@ -61,6 +61,8 @@ def rate_limit(new_value, last_value, dw_step, up_step):
 def update_v_cruise(v_cruise_kph, buttonEvents, button_timers, enabled, metric):
   # handle button presses. TODO: this should be in state_control, but a decelCruise press
   # would have the effect of both enabling and changing speed is checked after the state transition
+  reverse_acc_change = Params().get_bool("ReverseAccChange")
+
   if not enabled:
     return v_cruise_kph
 
@@ -83,11 +85,18 @@ def update_v_cruise(v_cruise_kph, buttonEvents, button_timers, enabled, metric):
         break
 
   if button_type:
-    v_cruise_delta = v_cruise_delta * (5 if long_press else 1)
-    if long_press and v_cruise_kph % v_cruise_delta != 0: # partial interval
-      v_cruise_kph = CRUISE_NEAREST_FUNC[button_type](v_cruise_kph / v_cruise_delta) * v_cruise_delta
+    if reverse_acc_change:
+      v_cruise_delta = v_cruise_delta * (1 if long_press else 5)
+      if not long_press and v_cruise_kph % v_cruise_delta != 0: # partial interval
+        v_cruise_kph = CRUISE_NEAREST_FUNC[button_type](v_cruise_kph / v_cruise_delta) * v_cruise_delta
+      else:
+        v_cruise_kph += v_cruise_delta * CRUISE_INTERVAL_SIGN[button_type]
     else:
-      v_cruise_kph += v_cruise_delta * CRUISE_INTERVAL_SIGN[button_type]
+      v_cruise_delta = v_cruise_delta * (5 if long_press else 1)
+      if long_press and v_cruise_kph % v_cruise_delta != 0: # partial interval
+        v_cruise_kph = CRUISE_NEAREST_FUNC[button_type](v_cruise_kph / v_cruise_delta) * v_cruise_delta
+      else:
+        v_cruise_kph += v_cruise_delta * CRUISE_INTERVAL_SIGN[button_type]
     v_cruise_kph = clip(round(v_cruise_kph, 1), V_CRUISE_MIN, V_CRUISE_MAX)
 
   return v_cruise_kph
