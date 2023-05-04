@@ -446,7 +446,9 @@ class Controls:
     model_fcw = self.sm['modelV2'].meta.hardBrakePredicted and not CS.brakePressed and not stock_long_is_braking
     planner_fcw = self.sm['longitudinalPlan'].fcw and self.enabled
     if planner_fcw or model_fcw:
-      self.events.add(EventName.fcw)
+      pass
+      # zulu: disable OP FCW. Too many false positives.
+      # self.events.add(EventName.fcw)
 
     if TICI:
       logs = messaging.drain_sock(self.log_sock, wait_for_one=False)
