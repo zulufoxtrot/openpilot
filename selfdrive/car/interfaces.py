@@ -144,7 +144,9 @@ class CarInterfaceBase(ABC):
     #if cs_out.gasPressed:
     #  events.add(EventName.gasPressed)
     if cs_out.stockFcw:
-      events.add(EventName.stockFcw)
+      pass
+      # zulu: disable OP FCW. Too many false positives.
+      #events.add(EventName.stockFcw)
     if cs_out.stockAeb:
       events.add(EventName.stockAeb)
     if cs_out.vEgo > MAX_CTRL_SPEED:
