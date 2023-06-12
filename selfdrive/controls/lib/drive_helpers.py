@@ -84,12 +84,18 @@ def update_v_cruise(v_cruise_kph, buttonEvents, button_timers, enabled, metric):
 
   if button_type:
     # zulu: reverse long/short press behavior.
-    v_cruise_delta = v_cruise_delta * (1 if long_press else 5)
+    v_cruise_delta = v_cruise_delta * (2 if long_press else 5)
     # zulu: reverse long/short press behavior.
-    if not long_press and v_cruise_kph % v_cruise_delta != 0: # partial interval
-      v_cruise_kph = CRUISE_NEAREST_FUNC[button_type](v_cruise_kph / v_cruise_delta) * v_cruise_delta
-    else:
+    if long_press:
       v_cruise_kph += v_cruise_delta * CRUISE_INTERVAL_SIGN[button_type]
+    else:
+      v_cruise_kph = CRUISE_NEAREST_FUNC[button_type](v_cruise_kph / v_cruise_delta) * v_cruise_delta
+
+    # zulu: commented native code
+    # if not long_press and v_cruise_kph % v_cruise_delta != 0: # partial interval
+    #   v_cruise_kph = CRUISE_NEAREST_FUNC[button_type](v_cruise_kph / v_cruise_delta) * v_cruise_delta
+    # else:
+    #   v_cruise_kph += v_cruise_delta * CRUISE_INTERVAL_SIGN[button_type]
     v_cruise_kph = clip(round(v_cruise_kph, 1), V_CRUISE_MIN, V_CRUISE_MAX)
 
   return v_cruise_kph
