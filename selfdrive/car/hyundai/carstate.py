@@ -80,59 +80,59 @@ class CarState(CarStateBase):
     self.cruise_set_speed_kph = set_speed
 
   #@staticmethod
-  def cruise_speed_button(self):
-    if self.prev_acc_active != self.acc_active:
-      self.prev_acc_active = self.acc_active
-      self.cruise_set_speed_kph = self.clu_Vanz
-
-    set_speed_kph = self.cruise_set_speed_kph
-    if not self.cruise_active:
-      if self.prev_clu_CruiseSwState != self.cruise_buttons:
-        self.prev_clu_CruiseSwState = self.cruise_buttons
-        if self.cruise_buttons == Buttons.GAP_DIST:  # mode change
-          self.cruise_set_mode += 1
-          if self.cruise_set_mode > 5:
-            self.cruise_set_mode = 0
-          return None
-      return self.cruise_set_speed_kph
-
-    if not self.prev_acc_set_btn:
-      self.prev_acc_set_btn = self.acc_active
-      if self.cruise_buttons == Buttons.RES_ACCEL:   # up 
-        self.cruise_set_speed_kph = self.VSetDis
-      else:
-        self.cruise_set_speed_kph = self.clu_Vanz
-      return self.cruise_set_speed_kph
-    elif self.prev_acc_set_btn != self.acc_active:
-      self.prev_acc_set_btn = self.acc_active
-
-    if self.cruise_buttons:
-      self.cruise_buttons_time += 1
-    else:
-      self.cruise_buttons_time = 0
-     
-    if self.cruise_buttons_time >= 60:
-      self.cruise_set_speed_kph = self.VSetDis
-
-    if self.prev_clu_CruiseSwState == self.cruise_buttons:
-      return set_speed_kph
-    self.prev_clu_CruiseSwState = self.cruise_buttons
-
-    if self.cruise_buttons == Buttons.RES_ACCEL:   # up 
-      set_speed_kph += 1
-    elif self.cruise_buttons == Buttons.SET_DECEL:  # dn
-      if self.gasPressed:
-        set_speed_kph = self.clu_Vanz + 1
-      else:
-        set_speed_kph -= 1
-
-    if set_speed_kph < 30 and not self.is_set_speed_in_mph:
-      set_speed_kph = 30
-    elif set_speed_kph < 20 and self.is_set_speed_in_mph:
-      set_speed_kph = 20
-
-    self.cruise_set_speed_kph = set_speed_kph
-    return  set_speed_kph
+  # def cruise_speed_button(self):
+  #   if self.prev_acc_active != self.acc_active:
+  #     self.prev_acc_active = self.acc_active
+  #     self.cruise_set_speed_kph = self.clu_Vanz
+  #
+  #   set_speed_kph = self.cruise_set_speed_kph
+  #   if not self.cruise_active:
+  #     if self.prev_clu_CruiseSwState != self.cruise_buttons:
+  #       self.prev_clu_CruiseSwState = self.cruise_buttons
+  #       if self.cruise_buttons == Buttons.GAP_DIST:  # mode change
+  #         self.cruise_set_mode += 1
+  #         if self.cruise_set_mode > 5:
+  #           self.cruise_set_mode = 0
+  #         return None
+  #     return self.cruise_set_speed_kph
+  #
+  #   if not self.prev_acc_set_btn:
+  #     self.prev_acc_set_btn = self.acc_active
+  #     if self.cruise_buttons == Buttons.RES_ACCEL:   # up
+  #       self.cruise_set_speed_kph = self.VSetDis
+  #     else:
+  #       self.cruise_set_speed_kph = self.clu_Vanz
+  #     return self.cruise_set_speed_kph
+  #   elif self.prev_acc_set_btn != self.acc_active:
+  #     self.prev_acc_set_btn = self.acc_active
+  #
+  #   if self.cruise_buttons:
+  #     self.cruise_buttons_time += 1
+  #   else:
+  #     self.cruise_buttons_time = 0
+  #
+  #   if self.cruise_buttons_time >= 60:
+  #     self.cruise_set_speed_kph = self.VSetDis
+  #
+  #   if self.prev_clu_CruiseSwState == self.cruise_buttons:
+  #     return set_speed_kph
+  #   self.prev_clu_CruiseSwState = self.cruise_buttons
+  #
+  #   if self.cruise_buttons == Buttons.RES_ACCEL:   # up
+  #
+  #   elif self.cruise_buttons == Buttons.SET_DECEL:  # dn
+  #     if self.gasPressed:
+  #       set_speed_kph = self.clu_Vanz + 1
+  #     else:
+  #       set_speed_kph -= 1
+  #
+  #   if set_speed_kph < 30 and not self.is_set_speed_in_mph:
+  #     set_speed_kph = 30
+  #   elif set_speed_kph < 20 and self.is_set_speed_in_mph:
+  #     set_speed_kph = 20
+  #
+  #   self.cruise_set_speed_kph = set_speed_kph
+  #   return  set_speed_kph
 
   def get_tpms(self, unit, fl, fr, rl, rr):
     factor = 0.72519 if unit == 1 else 0.1 if unit == 2 else 1 # 0:psi, 1:kpa, 2:bar
@@ -222,11 +222,14 @@ class CarState(CarStateBase):
     ret.cruiseState.cruiseSwState = self.cruise_buttons
     ret.cruiseState.modeSel = self.cruise_set_mode
 
-    set_speed = self.cruise_speed_button()
+    # zulu: try to do away with that messy function
+    # set_speed = self.cruise_speed_button()
     if ret.cruiseState.enabled and (self.brake_check == False or self.cancel_check == False):
       speed_conv = CV.MPH_TO_MS if self.is_set_speed_in_mph else CV.KPH_TO_MS
-      ret.cruiseState.speed = set_speed * speed_conv if not self.no_radar else \
-                                         cp.vl["LVR12"]["CF_Lvr_CruiseSet"] * speed_conv
+      # zulu: DANGEROUS! remove OPKR code at this level, replace it with Sunny/Comma code, no idea what it'll do!
+      ret.cruiseState.speed = cp.vl["SCC11"]["VSetDis"] * speed_conv
+      #ret.cruiseState.speed = set_speed * speed_conv if not self.no_radar else \
+      #  cp.vl["LVR12"]["CF_Lvr_CruiseSet"] * speed_conv
     else:
       ret.cruiseState.speed = 0
 
