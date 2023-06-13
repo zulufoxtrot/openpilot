@@ -386,6 +386,9 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in FEATURES["send_hda_mfa"]:
       self.lfahda = copy.copy(cp_cam.vl["LFAHDA_MFC"])
 
+    # zulu: copy electric drivetrain "category"
+    self.elect_gear = copy.copy(cp.vl["ELECT_GEAR"])
+
     ret.brakeHold = cp.vl["TCS15"]["AVH_LAMP"] == 2 # 0 OFF, 1 ERROR, 2 ACTIVE, 3 READY
     self.brakeHold = ret.brakeHold
     self.brake_error = cp.vl["TCS13"]["ACCEnable"] == 3 # 0 ACC CONTROL ENABLED, 1-3 ACC CONTROL DISABLED

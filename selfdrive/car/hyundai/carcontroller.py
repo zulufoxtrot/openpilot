@@ -4,8 +4,8 @@ from common.numpy_fast import clip, interp
 from common.conversions import Conversions as CV
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfahda_mfc, create_hda_mfc, \
-                                             create_scc11, create_scc12, create_scc13, create_scc14, \
-                                             create_scc42a, create_scc7d0, create_mdps12, create_fca11, create_fca12
+  create_scc11, create_scc12, create_scc13, create_scc14, \
+  create_scc42a, create_scc7d0, create_mdps12, create_fca11, create_fca12, create_regen_level_message
 from selfdrive.car.hyundai.values import Buttons, CarControllerParams, CAR, FEATURES
 from opendbc.can.packer import CANPacker
 from selfdrive.controls.lib.longcontrol import LongCtrlState
@@ -506,6 +506,13 @@ class CarController():
 
     if pcm_cancel_cmd and self.longcontrol:
       can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.CANCEL, clu11_speed, CS.CP.sccBus))
+      # zulu: lower regen level when SCC stops
+      if round(set_speed * CV.MS_TO_KPH) > 94:
+        # highway driving: set to zero
+        regen_level = 0
+      else:
+        regen_level = 1
+      can_sends.append(create_regen_level_message(self.packer, CS.elect_gear, regen_level))
 
     if CS.out.cruiseState.standstill:
       self.standstill_status = 1
