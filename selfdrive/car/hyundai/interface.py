@@ -329,7 +329,8 @@ class CarInterface(CarInterfaceBase):
     if ret.vEgo < self.CP.minSteerSpeed and self.no_mdps_mods:
       events.add(car.CarEvent.EventName.belowSteerSpeed)
     if self.CC.need_brake and not self.CC.longcontrol:
-      events.add(EventName.needBrake)
+      pass
+      # events.add(EventName.needBrake)
     if not self.CC.lkas_temp_disabled:
       if self.CC.lanechange_manual_timer and ret.vEgo > 0.3:
         events.add(EventName.laneChangeManual)
