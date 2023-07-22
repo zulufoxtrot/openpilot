@@ -119,6 +119,9 @@ class CarState(CarStateBase):
         set_speed_kph += 5
         if set_speed_kph % 5 != 0:
           set_speed_kph = int(round(set_speed_kph/5)*5)
+          # zulu: use speeds in this order: 50, 54, 60, 64, etc
+          if set_speed_kph % 10 != 0:
+            set_speed_kph -= 1
           #else:
           #  set_speed_kph += 1
       elif self.cruise_buttons[-1] == Buttons.SET_DECEL and not self.cruiseState_standstill:  # dn
@@ -126,6 +129,9 @@ class CarState(CarStateBase):
           set_speed_kph -= 5
           if set_speed_kph % 5 != 0:
             set_speed_kph = int(round(set_speed_kph/5)*5)
+            # zulu: use speeds in this order: 50, 54, 60, 64, etc
+            if set_speed_kph % 10 != 0:
+              set_speed_kph -= 1
           #else:
           #  set_speed_kph -= 1
 
