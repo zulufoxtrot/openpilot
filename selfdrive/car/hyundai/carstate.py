@@ -1,3 +1,4 @@
+from collections import deque
 import copy
 from cereal import car
 import cereal.messaging as messaging
@@ -6,17 +7,23 @@ from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
 from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, EV_CAR, HYBRID_CAR, Buttons, CAR
 from selfdrive.car.interfaces import CarStateBase
-from common.numpy_fast import interp
 from common.params import Params
 
 GearShifter = car.CarState.GearShifter
 
+PREV_BUTTON_SAMPLES = 8
+CLUSTER_SAMPLE_RATE = 20  # frames
+
 FCA_OPT = Params().get_bool('RadarDisable')
+
 
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+
+    self.cruise_buttons = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
+    self.main_buttons = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
 
     if self.CP.carFingerprint in FEATURES["use_cluster_gears"]:
       self.shifter_values = can_define.dv["CLU15"]["CF_Clu_Gear"]
@@ -58,7 +65,6 @@ class CarState(CarStateBase):
     self.cruise_active = False
 
     # atom
-    self.cruise_buttons = 0
     self.cruise_buttons_time = 0
     self.time_delay_int = 0
     self.VSetDis = 0
@@ -68,6 +74,7 @@ class CarState(CarStateBase):
     self.prev_clu_CruiseSwState = 0
     self.prev_acc_active = False
     self.prev_acc_set_btn = False
+    self.prev_cruise_btn = False
     self.acc_active = False
     self.cruise_set_speed_kph = 0
     self.cruise_set_mode = int(Params().get("CruiseStatemodeSelInit", encoding="utf8"))
@@ -106,29 +113,32 @@ class CarState(CarStateBase):
           self.cruise_set_speed_kph = self.VSetDis
           return self.cruise_set_speed_kph
 
-      if self.cruise_buttons[-1] == Buttons.RES_ACCEL and not self.cruiseState_standstill:   # up
-        # zulu: remove condition, always use 5kph increments
-        #if self.set_spd_five:
-        set_speed_kph += 5
-        if set_speed_kph % 5 != 0:
-          set_speed_kph = int(round(set_speed_kph/5)*5)
-        #else:
-        #  set_speed_kph += 1
-      elif self.cruise_buttons[-1] == Buttons.SET_DECEL and not self.cruiseState_standstill:  # dn
-        #if self.set_spd_five:
-        set_speed_kph -= 5
-        if set_speed_kph % 5 != 0:
-          set_speed_kph = int(round(set_speed_kph/5)*5)
-        #else:
-        #  set_speed_kph -= 1
+        if self.cruise_buttons[-1] == Buttons.RES_ACCEL and not self.cruiseState_standstill:   # up
+          # zulu: remove condition, always use 5kph increments
+          #if self.set_spd_five:
+          set_speed_kph += 5
+          if set_speed_kph % 5 != 0:
+            set_speed_kph = int(round(set_speed_kph/5)*5)
+          #else:
+          #  set_speed_kph += 1
+        elif self.cruise_buttons[-1] == Buttons.SET_DECEL and not self.cruiseState_standstill:  # dn
+          #if self.set_spd_five:
+          set_speed_kph -= 5
+          if set_speed_kph % 5 != 0:
+            set_speed_kph = int(round(set_speed_kph/5)*5)
+          #else:
+          #  set_speed_kph -= 1
 
-    if set_speed_kph < 30 and not self.is_set_speed_in_mph:
-      set_speed_kph = 30
-    elif set_speed_kph < 20 and self.is_set_speed_in_mph:
-      set_speed_kph = 20
+      if set_speed_kph < 30 and not self.is_set_speed_in_mph:
+        set_speed_kph = 30
+      elif set_speed_kph < 20 and self.is_set_speed_in_mph:
+        set_speed_kph = 20
 
-    self.cruise_set_speed_kph = set_speed_kph
-    return  set_speed_kph
+      self.cruise_set_speed_kph = set_speed_kph
+    else:
+      self.prev_cruise_btn = False
+
+    return set_speed_kph
 
   def get_tpms(self, unit, fl, fr, rl, rr):
     factor = 0.72519 if unit == 1 else 0.1 if unit == 2 else 1 # 0:psi, 1:kpa, 2:bar
@@ -226,17 +236,23 @@ class CarState(CarStateBase):
     else:
       ret.cruiseState.speed = 0
 
-    self.cruise_main_button = cp.vl["CLU11"]["CF_Clu_CruiseSwMain"]
-    self.prev_cruise_buttons = self.cruise_buttons
-    self.cruise_buttons = cp.vl["CLU11"]["CF_Clu_CruiseSwState"]
-    ret.cruiseButtons = self.cruise_buttons
+    ret.cruiseState.accActive = self.acc_active
+    ret.cruiseState.gapSet = cp.vl["SCC11"]['TauGapSet']
+    ret.cruiseState.cruiseSwState = self.cruise_buttons[-1]
+    ret.cruiseState.modeSel = self.cruise_set_mode
 
-    if self.prev_gap_button != self.cruise_buttons:
-      if self.cruise_buttons == 3:
+    self.cruise_main_button = cp.vl["CLU11"]["CF_Clu_CruiseSwMain"]
+    self.prev_cruise_buttons = self.cruise_buttons[-1]
+    self.cruise_buttons[-1] = cp.vl["CLU11"]["CF_Clu_CruiseSwState"]
+    ret.cruiseButtons = self.cruise_buttons[-1]
+
+    if self.prev_gap_button != self.cruise_buttons[-1]:
+      if self.cruise_buttons[-1] == 3:
         self.cruise_gap -= 1
       if self.cruise_gap < 1:
         self.cruise_gap = 4
-      self.prev_gap_button = self.cruise_buttons
+      self.prev_gap_button = self.cruise_buttons[-1]
+
 
     # TODO: Find brake pressure
     ret.brake = 0
@@ -244,7 +260,7 @@ class CarState(CarStateBase):
 
     if ret.brakePressed:
       self.brake_check = True
-    if self.cruise_buttons == 4:
+    if self.cruise_buttons[-1] == 4:
       self.cancel_check = True
 
     # TODO: Check this
@@ -363,6 +379,7 @@ class CarState(CarStateBase):
     # save the entire LKAS11, CLU11, SCC12 and MDPS12
     self.lkas11 = copy.copy(cp_cam.vl["LKAS11"])
     self.clu11 = copy.copy(cp.vl["CLU11"])
+    self.prev_cruise_buttons = self.cruise_buttons[-1]
     self.scc11 = copy.copy(cp_scc.vl["SCC11"])
     self.scc12 = copy.copy(cp_scc.vl["SCC12"])
     self.scc13 = copy.copy(cp_scc.vl["SCC13"])
