@@ -113,15 +113,15 @@ class CarState(CarStateBase):
           self.cruise_set_speed_kph = self.VSetDis
           return self.cruise_set_speed_kph
 
-        if self.cruise_buttons[-1] == Buttons.RES_ACCEL and not self.cruiseState_standstill:   # up
-          # zulu: remove condition, always use 5kph increments
-          #if self.set_spd_five:
-          set_speed_kph += 5
-          if set_speed_kph % 5 != 0:
-            set_speed_kph = int(round(set_speed_kph/5)*5)
+      if self.cruise_buttons[-1] == Buttons.RES_ACCEL and not self.cruiseState_standstill:   # up
+        # zulu: remove condition, always use 5kph increments
+        #if self.set_spd_five:
+        set_speed_kph += 5
+        if set_speed_kph % 5 != 0:
+          set_speed_kph = int(round(set_speed_kph/5)*5)
           #else:
           #  set_speed_kph += 1
-        elif self.cruise_buttons[-1] == Buttons.SET_DECEL and not self.cruiseState_standstill:  # dn
+      elif self.cruise_buttons[-1] == Buttons.SET_DECEL and not self.cruiseState_standstill:  # dn
           #if self.set_spd_five:
           set_speed_kph -= 5
           if set_speed_kph % 5 != 0:
