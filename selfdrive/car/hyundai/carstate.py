@@ -223,11 +223,6 @@ class CarState(CarStateBase):
       self.brake_check = False
       self.cancel_check = False
 
-    ret.cruiseState.accActive = self.acc_active
-    ret.cruiseState.gapSet = cp.vl["SCC11"]['TauGapSet']
-    ret.cruiseState.cruiseSwState = self.cruise_buttons
-    ret.cruiseState.modeSel = self.cruise_set_mode
-
     set_speed = self.cruise_speed_button()
     if ret.cruiseState.enabled and (self.brake_check == False or self.cancel_check == False):
       speed_conv = CV.MPH_TO_MS if self.is_set_speed_in_mph else CV.KPH_TO_MS
