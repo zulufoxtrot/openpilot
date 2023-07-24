@@ -129,37 +129,33 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     modelLagWarningDEPRECATED @93;
     startupOneplusDEPRECATED @82;
     startupFuzzyFingerprintDEPRECATED @97;
-    noTargetDEPRECATED @25;
-    brakeUnavailableDEPRECATED @2;
-
-    laneChangeManual @118;
-    emgButtonManual @119;
-    driverSteering @120;
-    modeChangeOpenpilot @121;
-    modeChangeDistcurv @122;
-    modeChangeDistance @123;
-    modeChangeCurv @124;
-    modeChangeOneway @125;
-    modeChangeMaponly @126;
-    needBrake @127;
-    standStill @128;
-    e2eLongAlert @129;
-    isgActive @130;
-    camSpeedDown @131;
-    gapAdjusting @132;
-    resCruise @133;
-    curvSpeedDown @134;
-    standstillResButton @135;
-    routineDriveOn @136;
-    lkasEnabled @137;
-    cutinDetection @138;
-    gearNotD @139;
-    unSleepMode @140;
-    speedBump @141;
-    sccDriverOverride @142;
-    doNotDisturb @143;
-    chimeAtResume @144;
-    autoHold @145;
+    laneChangeManual @108;
+    emgButtonManual @109;
+    driverSteering @110;
+    modeChangeOpenpilot @111;
+    modeChangeDistcurv @112;
+    modeChangeDistance @113;
+    modeChangeCurv @114;
+    modeChangeOneway @115;
+    modeChangeMaponly @116;
+    needBrake @117;
+    standStill @118;
+    e2eLongAlert @119;
+    isgActive @120;
+    camSpeedDown @121;
+    gapAdjusting @122;
+    resCruise @123;
+    curvSpeedDown @124;
+    standstillResButton @125;
+    routineDriveOn @126;
+    lkasEnabled @127;
+    cutinDetection @129;
+    gearNotD @130;
+    unSleepMode @131;
+    speedBump @132;
+    sccDriverOverride @133;
+    doNotDisturb @134;
+    chimeAtResume @135;
   }
 }
 
@@ -170,11 +166,9 @@ struct CarState {
   events @13 :List(CarEvent);
 
   # car speed
-  vEgo @1 :Float32;          # best estimate of speed
-  aEgo @16 :Float32;         # best estimate of acceleration
-  vEgoRaw @17 :Float32;      # unfiltered speed from CAN sensors
-  vEgoCluster @44 :Float32;  # best estimate of speed shown on car's instrument cluster, used for UI
-
+  vEgo @1 :Float32;         # best estimate of speed
+  aEgo @16 :Float32;        # best estimate of acceleration
+  vEgoRaw @17 :Float32;     # unfiltered speed from CAN sensors
   yawRate @22 :Float32;     # best estimate of yaw rate
   standstill @18 :Bool;
   wheelSpeeds @2 :WheelSpeeds;
@@ -183,12 +177,9 @@ struct CarState {
   gas @3 :Float32;        # this is user pedal only
   gasPressed @4 :Bool;    # this is user pedal only
 
-  engineRpm @46 :Float32;
-
   # brake pedal, 0.0-1.0
   brake @5 :Float32;      # this is user pedal only
   brakePressed @6 :Bool;  # this is user pedal only
-  regenBraking @45 :Bool; # this is user pedal only
   parkingBrake @39 :Bool;
   brakeHoldActive @38 :Bool;
 
@@ -205,8 +196,6 @@ struct CarState {
   stockAeb @30 :Bool;
   stockFcw @31 :Bool;
   espDisabled @32 :Bool;
-  accFaulted @42 :Bool;
-  carFaultedNonCritical @47 :Bool;  # some ECU is faulted, but car remains controllable
 
   # cruise state
   cruiseState @10 :CruiseState;
@@ -238,14 +227,14 @@ struct CarState {
   # opkr-tpms
   tpms @40 :TPMS;
 
-  radarDistance @49 :Float32;
-  standStill @50 :Bool;
-  vSetDis @51 :Float32;
-  cruiseButtons @52 :Float32;
-  cruiseAccStatus @53 :Bool;
-  driverAcc @54 :Bool;
-  autoHold @55 :Bool;    # AutoHold
-  cruiseGapSet @56 :UInt8;
+  radarDistance @41 :Float32;
+  standStill @42 :Bool;
+  vSetDis @43 :Float32;
+  cruiseButtons @44 :Float32;
+  cruiseAccStatus @45 :Bool;
+  driverAcc @46 :Bool;
+  brakeHold @47 :Bool;    # AutoHold
+  cruiseGapSet @48 :UInt8;
 
   # opkr
   safetyDist @49 :Float32;
@@ -276,7 +265,6 @@ struct CarState {
   struct CruiseState {
     enabled @0 :Bool;
     speed @1 :Float32;
-    speedCluster @6 :Float32;  # Set speed as shown on instrument cluster
     available @2 :Bool;
     speedOffset @3 :Float32;
     standstill @4 :Bool;
