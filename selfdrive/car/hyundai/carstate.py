@@ -208,7 +208,8 @@ class CarState(CarStateBase):
       if not self.is_metric:
         self.cluster_speed = math.floor(self.cluster_speed * CV.KPH_TO_MPH + CV.KPH_TO_MPH)
 
-    ret.vEgoCluster = self.cluster_speed * speed_conv
+    #zulu: might need to re-enable this (and other occurences of vEgoCluster)
+    #ret.vEgoCluster = self.cluster_speed * speed_conv
 
     ret.standStill = self.CP.standStill
 
