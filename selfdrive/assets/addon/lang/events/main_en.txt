@@ -92,7 +92,7 @@ Adaptive Cruise Disabled
 Steering Temporarily Unavailable
 Steering Temporarily Unavailable
 Steering paused, ISG is working
-Slowing Down for Speed Limit
+Slowing Down for SpeedLimit
 RES triggered for Departure
 Adjusting Cruise Gap
 Auto RES triggered
